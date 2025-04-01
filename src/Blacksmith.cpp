@@ -64,6 +64,9 @@ int check_cpu() {
 int main(int argc, char **argv) {
   Logger::initialize();
 
+  Logger::ntfy("Starting Blacksmith");
+
+
   // check if the system's CPU is supported by our hard-coded DRAM address matrices
   check_cpu();
 

@@ -50,6 +50,8 @@ class Logger {
   static void log_bitflip(volatile char *flipped_address, uint64_t row_no, unsigned char actual_value,
                           unsigned char expected_value, unsigned long timestamp, bool newline);
 
+  static void ntfy(const std::string &message);
+
   static void log_debug(const std::string &message, bool newline = true);
 
   static void log_timestamp();

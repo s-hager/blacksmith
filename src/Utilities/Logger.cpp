@@ -103,13 +103,16 @@ void Logger::log_bitflip(volatile char *flipped_address, uint64_t row_no, unsign
   instance.logfile << F_RESET;
   if (newline) instance.logfile << "\n";
 
-  // Make POST request to ntfy.sh
+  Logger::ntfy(log_message.str());
+}
+
+void Logger::ntfy(const std::string &message) {
   const char* ntfy_url = std::getenv("NTFY_URL");
   if (ntfy_url) {
     char hostname[1024] = "";
     gethostname(hostname, sizeof(hostname));
     
-    std::string cmd = "curl -d \"[" + std::string(hostname) + "] " + log_message.str() + "\" " + ntfy_url;
+    std::string cmd = "curl -d \"[" + std::string(hostname) + "] " + message + "\" " + ntfy_url;
     system(cmd.c_str());
   }
 }
