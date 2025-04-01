@@ -99,6 +99,10 @@ int main(int argc, char **argv) {
   if (program_args.acts_per_trefi==0)
     program_args.acts_per_trefi = dram_analyzer.count_acts_per_trefi();
 
+  Logger::log_info(format_string("Number of activations per refresh interval: %zu", program_args.acts_per_trefi));
+
+  Logger::ntfy("Starting Hammering. Number of activations per refresh interval: " + std::to_string(program_args.acts_per_trefi));
+
   if (!program_args.load_json_filename.empty()) {
     ReplayingHammerer replayer(memory);
     if (program_args.sweeping) {
@@ -118,6 +122,8 @@ int main(int argc, char **argv) {
     Logger::log_error("Invalid combination of program control-flow arguments given. "
                       "Note: Fuzzing is only supported with synchronized hammering.");
   }
+
+  Logger::ntfy("Exiting Blacksmith");
 
   Logger::close();
   return EXIT_SUCCESS;
