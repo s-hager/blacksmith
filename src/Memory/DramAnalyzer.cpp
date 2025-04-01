@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <unordered_set>
+#include <iostream>
 
 void DramAnalyzer::find_bank_conflicts() {
   size_t nr_banks_cur = 0;
@@ -162,6 +163,7 @@ size_t DramAnalyzer::count_acts_per_trefi() {
         acts.push_back(value);
         running_sum += value;
         // check after each 200 data points if our standard deviation reached 1 -> then stop collecting measurements
+        if ((acts.size()%1000)==0) std::cout << "std dev " << compute_std(acts, running_sum, acts.size()) << std::endl;
         if ((acts.size()%200)==0 && compute_std(acts, running_sum, acts.size())<3.0) break;
       }
       count_old = count;
