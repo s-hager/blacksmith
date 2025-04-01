@@ -115,6 +115,9 @@ void Logger::ntfy(const std::string &message) {
     std::string cmd = "curl -d \"[" + std::string(hostname) + "] " + message + "\" " + ntfy_url;
     system(cmd.c_str());
   }
+  else {
+    Logger::log_info("NTFY_URL not set. No notifications will be sent.");
+  }
 }
 
 void Logger::log_success(const std::string &message, bool newline) {
