@@ -42,6 +42,12 @@ int check_cpu() {
       "i7-8700",
       "i7-9700",
       "i7-9900"
+      "i7-9900"
+
+      // ours
+      "i9-11900K" // hammertest 13
+      "i9-10900K" // hammertest 02
+
   };
 
   bool cpu_supported = false;
