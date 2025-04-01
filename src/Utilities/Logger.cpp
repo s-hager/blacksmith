@@ -90,16 +90,25 @@ void Logger::log_timestamp() {
 }
 
 void Logger::log_bitflip(volatile char *flipped_address, uint64_t row_no, unsigned char actual_value,
-                         unsigned char expected_value, unsigned long timestamp, bool newline) {
-  instance.logfile << FC_GREEN
-                   << "[!] Flip " << std::hex << (void *) flipped_address << ", "
-                   << std::dec << "row " << row_no << ", "
-                   << "page offset: " << (uint64_t)flipped_address%(uint64_t)getpagesize() << ", "
-                   << "byte offset: " << (uint64_t)flipped_address%(uint64_t)8 << ", "
-                   << std::hex << "from " << (int) expected_value << " to " << (int) actual_value << ", "
-                   << std::dec << "detected after " << format_timestamp(timestamp - instance.timestamp_start) << ".";
+       unsigned char expected_value, unsigned long timestamp, bool newline) {
+  std::stringstream log_message;
+  log_message << FC_GREEN
+              << "[!] Flip " << std::hex << (void *) flipped_address << ", "
+              << std::dec << "row " << row_no << ", "
+              << "page offset: " << (uint64_t)flipped_address % (uint64_t)getpagesize() << ", "
+              << "byte offset: " << (uint64_t)flipped_address % (uint64_t)8 << ", "
+              << std::hex << "from " << (int) expected_value << " to " << (int) actual_value << ", "
+              << std::dec << "detected after " << format_timestamp(timestamp - instance.timestamp_start) << ".";
+  instance.logfile << log_message.str();
   instance.logfile << F_RESET;
   if (newline) instance.logfile << "\n";
+
+  // Make POST request to ntfy.sh
+  const char* ntfy_url = std::getenv("NTFY_URL");
+  if (ntfy_url) {
+    std::string cmd = "curl -d \"" + log_message.str() + "\" " + ntfy_url;
+    system(cmd.c_str());
+  }
 }
 
 void Logger::log_success(const std::string &message, bool newline) {
