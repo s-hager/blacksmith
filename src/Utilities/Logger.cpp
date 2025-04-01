@@ -90,7 +90,7 @@ void Logger::log_timestamp() {
 }
 
 void Logger::log_bitflip(volatile char *flipped_address, uint64_t row_no, unsigned char actual_value,
-       unsigned char expected_value, unsigned long timestamp, bool newline) {
+                         unsigned char expected_value, unsigned long timestamp, bool newline) {
   std::stringstream log_message;
   log_message << FC_GREEN
               << "[!] Flip " << std::hex << (void *) flipped_address << ", "
@@ -106,7 +106,10 @@ void Logger::log_bitflip(volatile char *flipped_address, uint64_t row_no, unsign
   // Make POST request to ntfy.sh
   const char* ntfy_url = std::getenv("NTFY_URL");
   if (ntfy_url) {
-    std::string cmd = "curl -d \"" + log_message.str() + "\" " + ntfy_url;
+    char hostname[1024] = "";
+    gethostname(hostname, sizeof(hostname));
+    
+    std::string cmd = "curl -d \"[" + std::string(hostname) + "] " + log_message.str() + "\" " + ntfy_url;
     system(cmd.c_str());
   }
 }
