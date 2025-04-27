@@ -1,6 +1,12 @@
 #include "Memory/DRAMAddr.hpp"
 #include "GlobalDefines.hpp"
 
+#include <unistd.h>   // for sysconf, lseek, read, close
+#include <fcntl.h>    // for open, O_RDONLY
+#include <cstdint>    // for uint64_t
+#include <cerrno>     // for errno
+#include <cstring>    // for strerror
+
 // initialize static variable
 std::map<size_t, MemConfiguration> DRAMAddr::Configs;
 
@@ -68,6 +74,55 @@ void *DRAMAddr::to_virt() const {
   }
   void *v_addr = (void *) (base_msb | res);
   return v_addr;
+}
+
+uint64_t DRAMAddr::to_phys() const {
+  void* virtual_address_ptr = this->to_virt();
+  uintptr_t virtual_address = reinterpret_cast<uintptr_t>(virtual_address_ptr);
+  uint64_t physical_address = 0;
+  long page_size = sysconf(_SC_PAGESIZE);
+  if (page_size < 0) {
+      perror("sysconf(_SC_PAGESIZE) failed");
+      return 0; // Indicate error
+  }
+
+  int pagemap_fd = open("/proc/self/pagemap", O_RDONLY);
+  if (pagemap_fd < 0) {
+      return 0; // Indicate error or lack of permissions
+  }
+
+  off_t offset = (virtual_address / page_size) * sizeof(uint64_t);
+  if (lseek(pagemap_fd, offset, SEEK_SET) == (off_t)-1) {
+      close(pagemap_fd);
+      return 0; // Indicate error
+  }
+
+  uint64_t pagemap_entry;
+  ssize_t read_result = read(pagemap_fd, &pagemap_entry, sizeof(pagemap_entry));
+  close(pagemap_fd); // Close the file descriptor regardless of read result
+
+  if (read_result != sizeof(pagemap_entry)) {
+      return 0; // Indicate error
+  }
+
+  if (!((pagemap_entry >> 63) & 1)) {
+      return 0; // Indicate not present
+  }
+
+  if (((pagemap_entry >> 62) & 1)) {
+    return 0;
+  }
+
+  uint64_t pfn = pagemap_entry & ((1ULL << 55) - 1);
+
+  if (pfn == 0) {
+    return 0;
+  }
+
+
+  physical_address = (pfn * page_size) + (virtual_address % page_size);
+
+  return physical_address;
 }
 
 std::string DRAMAddr::to_string() {

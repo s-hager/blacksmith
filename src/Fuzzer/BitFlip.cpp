@@ -15,7 +15,8 @@ void to_json(nlohmann::json &j, const BitFlip &p) {
                      {"data", p.corrupted_data},
                      {"observed_at", p.observation_time},
                      {"addr", addr.str()},
-                     {"page_offset", (uint64_t)p.address.to_virt()%getpagesize()}
+                     {"page_offset", (uint64_t)p.address.to_virt()%getpagesize()},
+                     {"ppn", (uint64_t)p.address.to_phys()}
   };
 }
 
