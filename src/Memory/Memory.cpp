@@ -173,6 +173,9 @@ size_t Memory::check_memory_internal(PatternAddressMapper &mapping,
           }
           // store detailed information about the bit flip
           BitFlip bitflip(flipped_addr_dram, (expected_value ^ flipped_addr_value), flipped_addr_value);
+          // print like in to_json in bitflip.cpp / to_json in DRAMAddr.cpp -> bank, row, col
+          Logger::log_info(bitflip.address.to_string());
+          // Logger::ntfy(bitflip.address.to_string());
           // ..in the mapping that triggered this bit flip
           if (!reproducibility_mode) {
             if (mapping.bit_flips.empty()) {

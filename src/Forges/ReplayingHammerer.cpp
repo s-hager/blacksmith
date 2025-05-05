@@ -109,6 +109,7 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
     std::vector<size_t> retries_per_round;
     std::vector<size_t> time_per_round_us;
     std::vector<size_t> bitflips_per_round;
+    std::vector<std::vector<BitFlip>> bitflips_details_per_round;
   };
   // mapping from mapping ID to repeatability data
   std::unordered_map<std::string,RepeatabilityData> repeatability_data;
@@ -156,7 +157,8 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
       .total_time_us = 0,
       .retries_per_round = std::vector<size_t>(),
       .time_per_round_us = std::vector<size_t>(),
-      .bitflips_per_round = std::vector<size_t>()
+      .bitflips_per_round = std::vector<size_t>(),
+      .bitflips_details_per_round = std::vector<std::vector<BitFlip>>()
     };
 
     std::vector<volatile char *> random_rows = mapper.get_random_nonaccessed_rows(params.get_max_row_no());
@@ -173,7 +175,7 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
         CodeJitter &jitter = mapper.get_code_jitter();
         auto num_bitflips = hammer_pattern(params,jitter,patt,mapper, jitter.flushing_strategy,
             jitter.fencing_strategy, 1, jitter.num_aggs_for_sync, jitter.total_activations,
-            false, jitter.pattern_sync_each_ref, false, false, false,
+            false, jitter.pattern_sync_each_ref, false, true, false, // enable verbose_memcheck to log bitflip locations in replay mode
             false,true);
 
         success = (num_bitflips > 0);
@@ -188,6 +190,7 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
           rep_data.retries_per_round.push_back(cur_try);
           rep_data.time_per_round_us.push_back(elapsed_time_us);
           rep_data.bitflips_per_round.push_back(num_bitflips);
+          rep_data.bitflips_details_per_round.push_back(mem.flipped_bits); // Store the bitflip details for this round
 
           break;
         }
@@ -218,6 +221,7 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
     experiment["retries_per_round"] = rep_data.retries_per_round;
     experiment["time_per_round_us"] = rep_data.time_per_round_us;
     experiment["bitflips_per_round"] = rep_data.bitflips_per_round;
+    experiment["bitflips_details_per_round"] = rep_data.bitflips_details_per_round;
 
     nlohmann::json root;
     root["metadata"] = meta;
