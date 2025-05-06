@@ -9,14 +9,22 @@
 
 void to_json(nlohmann::json &j, const BitFlip &p) {
   std::stringstream addr;
+  std::stringstream from;
+  std::stringstream to;
   addr << "0x" << std::hex << (uint64_t)p.address.to_virt();
+  from << "0x" << std::hex << static_cast<int>(p.bitmask ^ p.corrupted_data);
+  to << "0x" << std::hex << static_cast<int>(p.corrupted_data);
   j = nlohmann::json{{"dram_addr", p.address},
                      {"bitmask", p.bitmask},
                      {"data", p.corrupted_data},
                      {"observed_at", p.observation_time},
                      {"addr", addr.str()},
                      {"page_offset", (uint64_t)p.address.to_virt()%getpagesize()},
-                     {"ppn", (uint64_t)p.address.to_phys()}
+                     {"ppn", (uint64_t)p.address.to_phys()},
+                     {"0->1", p.count_z2o_corruptions()},
+                     {"1->0", p.count_o2z_corruptions()},
+                     {"from", from.str()},
+                     {"to", to.str()},
   };
 }
 

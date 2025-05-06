@@ -190,6 +190,14 @@ void ReplayingHammerer::replay_patterns(const std::string& json_filename,
           rep_data.retries_per_round.push_back(cur_try);
           rep_data.time_per_round_us.push_back(elapsed_time_us);
           rep_data.bitflips_per_round.push_back(num_bitflips);
+
+          // for (auto& bitflip : mem.flipped_bits) {
+          // Logger::log_info(bitflip.address.to_string());
+          // Logger::log_info(format_string("0->1 flips: %lu", bitflip.count_z2o_corruptions()));
+          // Logger::log_info(format_string("1->0 flips: %lu", bitflip.count_o2z_corruptions()));
+          // Logger::log_info(format_string("from 0x%llx to 0x%llx", (bitflip.bitmask ^ bitflip.corrupted_data), bitflip.corrupted_data)); // undo XOR of Memory.cpp again
+          // order in of actual_value and expected_value get switched between Memory.cpp and Logger.cpp in log_bitflip call. here we log it correctly, but main log method does not (now fixed)
+          // }
           rep_data.bitflips_details_per_round.push_back(mem.flipped_bits); // Store the bitflip details for this round
 
           break;
