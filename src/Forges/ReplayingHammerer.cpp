@@ -639,7 +639,7 @@ size_t ReplayingHammerer::replay_patterns_brief(std::vector<HammeringPattern> ha
       if (i + 1 < num_locations) {
         // move pattern to another location and then continue sweeping from there (we don't do this at the beginning of
         // the for loop because we want to include the sweep that starts at the start location of the best mapping
-        mapper.randomize_addresses(params, pattern.agg_access_patterns, false);
+//         mapper.randomize_addresses(params, pattern.agg_access_patterns, false);
       }
     }
   }
